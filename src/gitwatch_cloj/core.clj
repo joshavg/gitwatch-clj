@@ -6,7 +6,8 @@
                                             add-repo
                                             load-config]]
               [gitwatch-cloj.git :refer [status-changed
-                                         status-all]]))
+                                         status-all]]
+              [gitwatch-cloj.system :refer [open-repo]]))
 
 (def EXIT_CODE -256)
 
@@ -21,17 +22,18 @@
         [(status-changed (load-config))]
           (= "ls" input)
         [(status-all (load-config))]
-          (= "exit" input)
-        ["goodbye" EXIT_CODE]
           (= "ls-conf" input)
         [(load-config-string)]
           (= "add" input)
         (add-repo (prompt "Name") (prompt "Path"))
+          (.startsWith input "open ")
+        (open-repo input)
+          (= "exit" input)
+        ["goodbye" EXIT_CODE]
           :else
         ["need help?"]))
 
-(defn mainloop
-    []
+(defn mainloop []
     (loop [input (read-line)]
         (let [[output return-code]
                  (handle-input (trim input))
@@ -42,10 +44,11 @@
                   (= rc EXIT_CODE)
                 (println output)
                   :else
-                (println "error occured" rc)))))
+                (do
+                    (println "error occured:" output ", error code" rc)
+                    (recur (read-line)))))))
 
 (defn -main
-    "I don't do a whole lot ... yet."
     [& args]
     (init-config-file)
     (println "Welcome to GitWatch")

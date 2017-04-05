@@ -28,3 +28,8 @@
           newrepos (merge repos {(keyword name) gitdir})
           newconf  (assoc conf :repos newrepos)]
         (save-config newconf)))
+
+(defn find-repo-path [name]
+    (let [conf   (load-config)
+          kwname (keyword name)]
+        (kwname (:repos conf))))
