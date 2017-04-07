@@ -30,7 +30,7 @@
              :clean    (if is-clean "✓" "✗")
              :modified (str (.size (.getModified status)))
              :ahead    (or ahead "?")
-             :_show    (or show-unchanged (not is-clean) (> ahead 0))})
+             :_show    (or show-unchanged (not is-clean) (> (or ahead 1) 0))})
         (catch NoWorkTreeException e
                {:name     (:name repo-parsed)
                 :branch   "check path"
