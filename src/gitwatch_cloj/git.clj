@@ -4,7 +4,7 @@
              org.eclipse.jgit.lib.BranchTrackingStatus
              org.eclipse.jgit.errors.NoWorkTreeException
              java.io.File)
-    (:require [gitwatch-cloj.format :refer [format-table]]))
+    (:require [clojure.pprint :refer [print-table]]))
 
 (defn create-git
     [path]
@@ -24,41 +24,38 @@
               status   (.call (.status git))
               is-clean (.isClean status)
               bts      (BranchTrackingStatus/of repo branch)
-              ahead    (.getAheadCount bts)]
-            {:clean    (if is-clean "✓" "✗")
+              ahead    (if (nil? bts) nil (.getAheadCount bts))]
+            {:name     name
              :branch   branch
+             :clean    (if is-clean "✓" "✗")
              :modified (str (.size (.getModified status)))
-             :name     name
-             :ahead    (str ahead)
+             :ahead    (or ahead "?")
              :_show    (or show-unchanged (not is-clean) (> ahead 0))})
         (catch NoWorkTreeException e
-               {:clean    "?"
+               {:name     (:name repo-parsed)
                 :branch   "check path"
+                :clean    "?"
                 :modified "?"
-                :name     (:name repo-parsed)
                 :ahead    "?"
                 :_show    true})))
 
 (defn status-table
     [config show-unchanged]
-    (format-table
-        ["name"
-         "branch"
-         "clean"
-         "modified"
-         "ahead"]
-        (filter #(:_show %)
-                (map
-                    #(status-git % show-unchanged)
+    (with-out-str
+        (print-table
+            [:name :branch :clean :modified :ahead]
+            (filter #(:_show %)
                     (map
-                        (fn [repo-entry]
-                            (let [path       (val repo-entry)
-                                  repo-name  (key repo-entry)
-                                  [git repo] (create-git path)]
-                                {:name (name repo-name)
-                                 :git  git
-                                 :repo repo}))
-                        (:repos config))))))
+                        #(status-git % show-unchanged)
+                        (map
+                            (fn [repo-entry]
+                                (let [path       (val repo-entry)
+                                      repo-name  (key repo-entry)
+                                      [git repo] (create-git path)]
+                                    {:name (name repo-name)
+                                     :git  git
+                                     :repo repo}))
+                            (:repos config)))))))
 
 (defn status-changed [config]
     (status-table config false))

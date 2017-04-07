@@ -14,11 +14,16 @@
 (defn save-config [newconf]
     (spit FILE_PATH (.toString newconf)))
 
+(def empty-config
+    {:repos    {}
+     :git-tool {:command "x-terminal-emulator" :method "cwd"}
+     :version  2})
+
 (defn init-config-file
     "writes an empty config file"
     []
     (when (not (.exists (as-file FILE_PATH)))
-          (spit FILE_PATH (with-out-str (print {:repos {}})))))
+          (spit FILE_PATH (with-out-str (print empty-config)))))
 
 (defn add-repo
     [name path]

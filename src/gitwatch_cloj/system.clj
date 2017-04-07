@@ -1,17 +1,12 @@
 (ns gitwatch-cloj.system
-    (:require [clojure.java.shell :refer [sh]]
-              [clojure.string :refer [split]]
-              [gitwatch-cloj.config :refer [find-repo-path]]))
+    (:require [clojure.java.shell :refer [sh]]))
 
-(defn open-emulator [path]
-    (sh "x-terminal-emulator" :dir path))
+(defn open-git-tool [path tool-cfg]
+    (sh (:command tool-cfg) :dir path))
 
-(defn open-repo [cmd]
-    (let [splits (split cmd #"\s+")
-          name   (nth splits 1 nil)
-          path   (find-repo-path name)]
-        (if (nil? path)
-            ["unknown repo" 10]
-            (do
-                (open-emulator path)
-                ["" 0]))))
+(defn open-repo [path config]
+    (if (nil? path)
+        ["unknown repo" 10]
+        (do
+            (open-git-tool (str path "/..") (:git-tool config))
+            ["" 0])))

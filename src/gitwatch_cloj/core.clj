@@ -1,20 +1,23 @@
 (ns gitwatch-cloj.core
     (:gen-class)
-    (:require [clojure.string :refer [trim]]
+    (:require [clojure.string :refer [trim split]]
               [gitwatch-cloj.config :refer [load-config-string
                                             init-config-file
                                             add-repo
-                                            load-config]]
+                                            load-config
+                                            find-repo-path]]
               [gitwatch-cloj.git :refer [status-changed
                                          status-all]]
               [gitwatch-cloj.system :refer [open-repo]]))
 
 (def EXIT_CODE -256)
 
-(defn prompt
-    [txt]
+(defn prompt [txt]
     (println txt)
     (read-line))
+
+(defn get-param-1 [cmd]
+    (nth (split cmd #"\s+") 1 nil))
 
 (defn handle-input
     [input]
@@ -27,7 +30,7 @@
           (= "add" input)
         (add-repo (prompt "Name") (prompt "Path"))
           (.startsWith input "open ")
-        (open-repo input)
+        (open-repo (find-repo-path (get-param-1 input)) (load-config))
           (= "exit" input)
         ["goodbye" EXIT_CODE]
           :else
@@ -45,7 +48,7 @@
                 (println output)
                   :else
                 (do
-                    (println "error occured:" output ", error code" rc)
+                    (println (format "error occured: %s, error code %d" output rc))
                     (recur (read-line)))))))
 
 (defn -main

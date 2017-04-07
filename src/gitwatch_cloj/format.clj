@@ -1,5 +1,7 @@
 (ns gitwatch-cloj.format)
 
+; now unused - but code to learn from in future times
+
 ;╔════════════╤═════════╤════════╤══════════╤═══════╤════════╗
 ;║ Name       │ Branch  │ Status │ Modified │ Ahead │ Behind ║
 ;╠════════════╪═════════╪════════╪══════════╪═══════╪════════╣
