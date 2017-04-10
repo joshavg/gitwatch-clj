@@ -4,14 +4,15 @@
              org.eclipse.jgit.lib.BranchTrackingStatus
              org.eclipse.jgit.errors.NoWorkTreeException
              java.io.File)
-    (:require [clojure.pprint :refer [print-table]]))
+    (:require [clojure.pprint :refer [print-table]]
+              [clojure.java.io :refer [as-file]]))
 
 (defn create-git
     [path]
-    (let [repo (.build
-                   (.setGitDir
-                       (FileRepositoryBuilder.)
-                       (File. path)))]
+    (let [path-file (as-file path)
+          repo      (-> (FileRepositoryBuilder.)
+                        (.setGitDir path-file)
+                        (.build))]
         [(Git. repo) repo]))
 
 (defn fetch-status
@@ -41,24 +42,22 @@
 
 (defn table-content
     [config show-unchanged]
-    (map
-        #(fetch-status % show-unchanged)
-        (map
-            (fn [[repo-name path]]
-                (let [[git repo] (create-git path)]
-                    {:name (name repo-name)
-                     :git  git
-                     :repo repo}))
-            (:repos config))))
+    (->> (:repos config)
+         (map
+             (fn [[repo-name path]]
+                 (let [[git repo] (create-git path)]
+                     {:name (name repo-name)
+                      :git  git
+                      :repo repo})))
+         (map #(fetch-status % show-unchanged))))
 
 (defn status-table
     [config show-unchanged]
-    (with-out-str
-        (print-table
-            [:name :branch :clean :modified :ahead]
-            (sort-by :name
-                     (filter :_show
-                             (table-content config show-unchanged))))))
+    (->> (table-content config show-unchanged)
+         (filter :_show)
+         (sort-by :name)
+         (print-table [:name :branch :clean :modified :ahead])
+         (with-out-str)))
 
 (defn status-changed [config]
     (status-table config false))
