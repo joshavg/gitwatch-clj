@@ -8,4 +8,5 @@
                    [org.eclipse.jgit/org.eclipse.jgit "4.4.1.201607150455-r"]]
     :main ^:skip-aot gitwatch-cloj.core
     :target-path "target/%s"
-    :profiles {:uberjar {:aot :all}})
+    :profiles {:uberjar {:aot :all}}
+    :plugins [[jonase/eastwood "0.2.3"]])

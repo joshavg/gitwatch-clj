@@ -4,8 +4,8 @@
              org.eclipse.jgit.lib.BranchTrackingStatus
              org.eclipse.jgit.errors.NoWorkTreeException
              java.io.File)
-    (:require [clojure.pprint :refer [print-table]]
-              [clojure.java.io :refer [as-file]]))
+    (:require [clojure.java.io :refer [as-file]]
+              [cli-app-frmwk.io :refer [create-table]]))
 
 (defn create-git
     [path]
@@ -56,8 +56,7 @@
     (->> (table-content config show-unchanged)
          (filter :_show)
          (sort-by :name)
-         (print-table [:name :branch :clean :modified :ahead])
-         (with-out-str)))
+         (create-table [:name :branch :clean :modified :ahead])))
 
 (defn status-changed [config]
     (status-table config false))

@@ -8,51 +8,29 @@
                                             find-repo-path]]
               [gitwatch-cloj.git :refer [status-changed
                                          status-all]]
-              [gitwatch-cloj.system :refer [open-repo]]))
-
-(def EXIT_CODE -256)
-
-(defn prompt [txt]
-    (println txt)
-    (read-line))
+              [gitwatch-cloj.system :refer [open-repo]]
+              [cli-app-frmwk.core :refer [exit-fn
+                                          run-lifecycle]]
+              [cli-app-frmwk.io :refer [prompt]]))
 
 (defn get-param-1 [cmd]
     (nth (split cmd #"\s+") 1 nil))
 
-(defn handle-input
-    [input]
-    (cond (empty? input)
-        [(status-changed (load-config))]
-          (= "ls" input)
-        [(status-all (load-config))]
-          (= "ls-conf" input)
-        [(load-config-string)]
-          (= "add" input)
-        (add-repo (prompt "Name") (prompt "Path"))
-          (.startsWith input "open ")
-        (open-repo (find-repo-path (get-param-1 input)) (load-config))
-          (= "exit" input)
-        ["goodbye" EXIT_CODE]
-          :else
-        ["need help?"]))
-
-(defn mainloop []
-    (loop [input (read-line)]
-        (let [[output return-code]
-                 (handle-input (trim input))
-              rc (if (nil? return-code) 0 return-code)]
-            (cond (= rc 0)
-                (do (println (if (nil? output) "" output))
-                    (recur (read-line)))
-                  (= rc EXIT_CODE)
-                (println output)
-                  :else
-                (do
-                    (println (format "error occured: %s, error code %d" output rc))
-                    (recur (read-line)))))))
-
 (defn -main
     [& args]
     (init-config-file)
-    (println "Welcome to GitWatch")
-    (mainloop))
+    (run-lifecycle
+        {:welcome "Welcome to GitWatch"
+         :states  [{:test #(empty? %)
+                    :task (fn [l] {:out (status-changed (load-config))})}
+                   {:test #(= "ls" %)
+                    :task (fn [l] {:out (status-all (load-config))})}
+                   {:test #(= "ls-conf" %)
+                    :task (fn [l] {:out (load-config-string)})}
+                   {:test #(= "add" %)
+                    :task (fn [l] (add-repo (prompt "Name") (prompt "Path")))}
+                   {:test #(.startsWith % "open")
+                    :task #((open-repo (find-repo-path (get-param-1 %)) (load-config)))}
+                   exit-fn
+                   {:test (fn [l] true)
+                    :task (fn [l] {:out "need help?"})}]}))
