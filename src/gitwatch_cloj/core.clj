@@ -30,7 +30,7 @@
                    {:test #(= "add" %)
                     :task (fn [l] (add-repo (prompt "Name") (prompt "Path")))}
                    {:test #(.startsWith % "open")
-                    :task #((open-repo (find-repo-path (get-param-1 %)) (load-config)))}
+                    :task #(open-repo (find-repo-path (get-param-1 %)) (load-config))}
                    exit-fn
                    {:test (fn [l] true)
                     :task (fn [l] {:out "need help?"})}]}))
