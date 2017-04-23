@@ -4,6 +4,7 @@
               [gitwatch-cloj.config :refer [load-config-string
                                             init-config-file
                                             add-repo
+                                            add-resursive-repos
                                             load-config
                                             find-repo-path]]
               [gitwatch-cloj.git :refer [status-changed
@@ -29,6 +30,8 @@
                     :task (fn [l] {:out (load-config-string)})}
                    {:test #(= "add" %)
                     :task (fn [l] (add-repo (prompt "Name") (prompt "Path")))}
+                   {:test #(= "addr" %)
+                    :task (fn [l] (add-resursive-repos (prompt "Path")))}
                    {:test #(.startsWith % "open")
                     :task #((open-repo (find-repo-path (get-param-1 %)) (load-config)))}
                    exit-fn

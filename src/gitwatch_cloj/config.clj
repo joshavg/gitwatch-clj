@@ -1,5 +1,7 @@
 (ns gitwatch-cloj.config
-    (:use [clojure.java.io :only (as-file)]))
+    (:require [clojure.java.io :refer [as-file]]
+              [clojure.string :refer [ends-with?]]
+              [cli-app-frmwk.io :refer [prompt]]))
 
 (def FILE_PATH
     (str (System/getProperty "user.home")
@@ -34,7 +36,15 @@
           newconf  (assoc conf :repos newrepos)]
         (save-config newconf)))
 
+(defn add-resursive-repos [path]
+    (->> (file-seq (as-file path))
+         (filter
+             #(and (ends-with? (str %) "/.git")
+               (.isDirectory %)))
+         (map #(hash-map :path % :name (prompt (str "Name for " %))))
+         (filter #(not-empty? (:name %)))))
+
 (defn find-repo-path [name]
     (let [conf   (load-config)
-          kwname (keyword name)]
-        (kwname (:repos conf))))
+          kw-name (keyword name)]
+        (kw-name (:repos conf))))
