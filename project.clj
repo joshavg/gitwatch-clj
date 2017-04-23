@@ -5,6 +5,7 @@
     {:name "GNU GPL v3"
      :url  "https://www.gnu.org/licenses/gpl-3.0.html"}
     :dependencies [[org.clojure/clojure "1.8.0"]
+                   [me.raynes/fs "1.4.6"]
                    [org.eclipse.jgit/org.eclipse.jgit "4.4.1.201607150455-r"]]
     :main ^:skip-aot gitwatch-cloj.core
     :target-path "target/%s"

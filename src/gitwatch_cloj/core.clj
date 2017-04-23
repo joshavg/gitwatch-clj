@@ -14,7 +14,7 @@
                                           run-lifecycle]]
               [cli-app-frmwk.io :refer [prompt]]))
 
-(defn get-param-1 [cmd]
+(defn- get-param-1 [cmd]
     (nth (split cmd #"\s+") 1 nil))
 
 (defn -main
