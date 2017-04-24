@@ -7,7 +7,7 @@
     (:require [clojure.java.io :refer [as-file]]
               [cli-app-frmwk.io :refer [create-table]]))
 
-(defn create-git
+(defn- create-git
     [path]
     (let [path-file (as-file path)
           repo      (-> (FileRepositoryBuilder.)
@@ -15,7 +15,7 @@
                         (.build))]
         [(Git. repo) repo]))
 
-(defn fetch-status
+(defn- fetch-status
     [repo-instances show-unchanged]
     (try
         (let [git      (:git repo-instances)
@@ -40,7 +40,7 @@
                 :ahead    "?"
                 :_show    true})))
 
-(defn table-content
+(defn- table-content
     [config show-unchanged]
     (->> (:repos config)
          (map
@@ -51,7 +51,7 @@
                       :repo repo})))
          (map #(fetch-status % show-unchanged))))
 
-(defn status-table
+(defn- status-table
     [config show-unchanged]
     (->> (table-content config show-unchanged)
          (filter :_show)
