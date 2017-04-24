@@ -6,7 +6,8 @@
                                             add-repo
                                             add-resursive-repos
                                             load-config
-                                            find-repo-path]]
+                                            find-repo-path
+                                            remove-repo]]
               [gitwatch-cloj.git :refer [status-changed
                                          status-all]]
               [gitwatch-cloj.system :refer [open-repo]]
@@ -32,6 +33,8 @@
                     :task (fn [l] (add-repo (prompt "Name") (prompt "Path")))}
                    {:test #(= "addr" %)
                     :task (fn [l] (add-resursive-repos (prompt "Path")))}
+                   {:test #(= "rm" %)
+                    :task (fn [l] (remove-repo (prompt "Name")))}
                    {:test #(.startsWith % "open")
                     :task #(open-repo (find-repo-path (get-param-1 %)) (load-config))}
                    exit-fn
